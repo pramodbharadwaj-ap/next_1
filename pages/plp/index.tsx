@@ -16,16 +16,6 @@ type Product = {
   rating?: { rate: number; count: number };
 };
 
-type RawProduct = {
-  id: number;
-  title: string;
-  description: string;
-  price: number;
-  image: string;
-  category: string;
-  rating: { rate: number; count: number };
-};
-
 export default function Products({ products = [] }: { products: Product[] }) {
   const addToCart = useCartStore((state) => state.addToCart);
 
@@ -54,10 +44,10 @@ export default function Products({ products = [] }: { products: Product[] }) {
       <div
         css={css`
           display: grid;
+          grid-template-columns: repeat(4, 1fr);
           gap: 1.5rem;
           max-width: 1400px;
           margin: 0 auto;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         `}
       >
         {products.map((product) => (
@@ -73,7 +63,6 @@ export default function Products({ products = [] }: { products: Product[] }) {
               align-items: center;
               text-align: center;
               transition: transform 0.16s, box-shadow 0.16s;
-
               &:hover {
                 transform: translateY(-4px) scale(1.03);
                 box-shadow: 0 8px 24px rgba(30, 41, 59, 0.13);
@@ -177,7 +166,6 @@ export default function Products({ products = [] }: { products: Product[] }) {
                 margin-top: auto;
                 box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
                 transition: background 0.18s, transform 0.13s;
-
                 &:hover {
                   background: linear-gradient(
                     90deg,
@@ -202,13 +190,13 @@ export async function getStaticProps() {
   try {
     const res = await fetch("https://fakestoreapi.com/products");
     if (!res.ok) throw new Error("Failed to fetch products");
-    const data: RawProduct[] = await res.json();
+    const data = await res.json();
 
-    const products: Product[] = data.map((product) => ({
+    const products = data.map((product: any) => ({
       id: product.id,
       name: product.title,
       description: product.description,
-      price: `$${product.price.toFixed(2)}`,
+      price: `$${product.price}`,
       image: product.image,
       category: product.category,
       rating: product.rating,

@@ -6,6 +6,7 @@ import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import useCartStore from "../../stores/cartStore";
 
+// === Type Definitions ===
 type Product = {
   id: number;
   name: string;
@@ -26,6 +27,7 @@ type RawProduct = {
   rating: { rate: number; count: number };
 };
 
+// === Component ===
 export default function Products({ products = [] }: { products: Product[] }) {
   const addToCart = useCartStore((state) => state.addToCart);
 
@@ -51,6 +53,7 @@ export default function Products({ products = [] }: { products: Product[] }) {
       >
         All Products
       </h1>
+
       <div
         css={css`
           display: grid;
@@ -73,7 +76,6 @@ export default function Products({ products = [] }: { products: Product[] }) {
               align-items: center;
               text-align: center;
               transition: transform 0.16s, box-shadow 0.16s;
-
               &:hover {
                 transform: translateY(-4px) scale(1.03);
                 box-shadow: 0 8px 24px rgba(30, 41, 59, 0.13);
@@ -177,7 +179,6 @@ export default function Products({ products = [] }: { products: Product[] }) {
                 margin-top: auto;
                 box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
                 transition: background 0.18s, transform 0.13s;
-
                 &:hover {
                   background: linear-gradient(
                     90deg,
@@ -198,10 +199,12 @@ export default function Products({ products = [] }: { products: Product[] }) {
   );
 }
 
+// === Data Fetching ===
 export async function getStaticProps() {
   try {
     const res = await fetch("https://fakestoreapi.com/products");
     if (!res.ok) throw new Error("Failed to fetch products");
+
     const data: RawProduct[] = await res.json();
 
     const products: Product[] = data.map((product) => ({

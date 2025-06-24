@@ -16,6 +16,16 @@ type Product = {
   rating?: { rate: number; count: number };
 };
 
+type RawProduct = {
+  id: number;
+  title: string;
+  description: string;
+  price: number;
+  image: string;
+  category: string;
+  rating: { rate: number; count: number };
+};
+
 export default function Products({ products = [] }: { products: Product[] }) {
   const addToCart = useCartStore((state) => state.addToCart);
 
@@ -169,7 +179,11 @@ export default function Products({ products = [] }: { products: Product[] }) {
                 transition: background 0.18s, transform 0.13s;
 
                 &:hover {
-                  background: linear-gradient(90deg, #1e40af 60%, #2563eb 100%);
+                  background: linear-gradient(
+                    90deg,
+                    #1e40af 60%,
+                    #2563eb 100%
+                  );
                   transform: scale(1.04);
                 }
               `}
@@ -188,9 +202,9 @@ export async function getStaticProps() {
   try {
     const res = await fetch("https://fakestoreapi.com/products");
     if (!res.ok) throw new Error("Failed to fetch products");
-    const data = await res.json();
+    const data: RawProduct[] = await res.json();
 
-    const products = data.map((product: any) => ({
+    const products: Product[] = data.map((product) => ({
       id: product.id,
       name: product.title,
       description: product.description,

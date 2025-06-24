@@ -3,11 +3,21 @@ import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 import useCartStore from "../../../stores/cartStore";
 
+// UI-safe product type
 type Product = {
   id: number;
   name: string;
   description: string;
   price: string;
+  image: string;
+};
+
+// API raw product structure
+type ApiProduct = {
+  id: number;
+  title: string;
+  description: string;
+  price: number;
   image: string;
 };
 
@@ -68,12 +78,11 @@ export default function ProductDetail({ product }: { product: Product }) {
   );
 }
 
-// Fetch all product paths from API
 export async function getStaticPaths() {
   const res = await fetch("https://fakestoreapi.com/products");
-  const data = await res.json();
+  const data: ApiProduct[] = await res.json();
 
-  const paths = data.map((product: any) => ({
+  const paths = data.map((product) => ({
     params: { id: product.id.toString() },
   }));
 
@@ -83,14 +92,14 @@ export async function getStaticPaths() {
   };
 }
 
-// Fetch individual product by ID from API
 export async function getStaticProps({ params }: { params: { id: string } }) {
   const res = await fetch(`https://fakestoreapi.com/products/${params.id}`);
+
   if (!res.ok) {
     return { notFound: true };
   }
 
-  const product = await res.json();
+  const product: ApiProduct = await res.json();
 
   return {
     props: {

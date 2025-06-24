@@ -4,6 +4,7 @@ import Footer from "../components/Footer";
 import Slider from "../components/Slider";
 import Image from "next/image";
 
+// Product type used in the UI
 type Product = {
   id: number;
   name: string;
@@ -11,6 +12,17 @@ type Product = {
   price: string;
   image: string;
   category?: string;
+  rating?: { rate: number; count: number };
+};
+
+// Raw product type from the API
+type ApiProduct = {
+  id: number;
+  title: string;
+  description: string;
+  price: number;
+  image: string;
+  category: string;
   rating?: { rate: number; count: number };
 };
 
@@ -50,7 +62,9 @@ export default function Home({ products = [] }: { products: Product[] }) {
                 <span className="text-base font-semibold text-blue-600 dark:text-blue-400 mb-2">{product.price}</span>
                 {product.rating && (
                   <span className="text-xs text-yellow-600 mb-1 flex items-center gap-1">
-                    <svg width="14" height="14" fill="currentColor" className="inline-block"><path d="M7 10.5l-4.33 2.28.83-4.84L.5 4.72l4.87-.7L7 0l1.63 4.02 4.87.7-3.5 3.22.83 4.84z"/></svg>
+                    <svg width="14" height="14" fill="currentColor" className="inline-block">
+                      <path d="M7 10.5l-4.33 2.28.83-4.84L.5 4.72l4.87-.7L7 0l1.63 4.02 4.87.7-3.5 3.22.83 4.84z" />
+                    </svg>
                     {product.rating.rate} ({product.rating.count})
                   </span>
                 )}
@@ -71,8 +85,9 @@ export async function getServerSideProps() {
     const res = await fetch("https://fakestoreapi.com/products");
     if (!res.ok) throw new Error("Failed to fetch");
 
-    const data = await res.json();
-    const products = data.map((product: any) => ({
+    const data: ApiProduct[] = await res.json();
+
+    const products: Product[] = data.map((product) => ({
       id: product.id,
       name: product.title,
       description: product.description,

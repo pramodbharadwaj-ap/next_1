@@ -5,6 +5,7 @@ import Image from "next/image";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import useCartStore from "../../stores/cartStore";
+import useWishlistStore from "../../stores/wishlistStore"; // Add this import
 
 // === Type Definitions ===
 type Product = {
@@ -30,6 +31,7 @@ type RawProduct = {
 // === Component ===
 export default function Products({ products = [] }: { products: Product[] }) {
   const addToCart = useCartStore((state) => state.addToCart);
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistStore();
 
   return (
     <div
@@ -76,6 +78,7 @@ export default function Products({ products = [] }: { products: Product[] }) {
               align-items: center;
               text-align: center;
               transition: transform 0.16s, box-shadow 0.16s;
+              position: relative;
               &:hover {
                 transform: translateY(-4px) scale(1.03);
                 box-shadow: 0 8px 24px rgba(30, 41, 59, 0.13);
@@ -83,6 +86,49 @@ export default function Products({ products = [] }: { products: Product[] }) {
               }
             `}
           >
+            {/* Wishlist Icon Button */}
+            <button
+              css={css`
+                position: absolute;
+                top: 14px;
+                right: 14px;
+                background: #fff;
+                border-radius: 50%;
+                padding: 7px;
+                box-shadow: 0 2px 8px rgba(255, 0, 80, 0.08);
+                border: none;
+                cursor: pointer;
+                transition: background 0.18s;
+                &:hover {
+                  background: #ffe4ef;
+                }
+              `}
+              aria-label="Add to wishlist"
+              onClick={() =>
+                isInWishlist(product.id)
+                  ? removeFromWishlist(product.id)
+                  : addToWishlist({
+                      id: product.id,
+                      name: product.name,
+                      price: product.price,
+                      image: product.image,
+                    })
+              }
+              type="button"
+            >
+              <svg
+                width="24"
+                height="24"
+                fill={isInWishlist(product.id) ? "red" : "none"}
+                stroke="red"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 1.01 4.5 2.09C13.09 4.01 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                />
+              </svg>
+            </button>
             <Link
               href={`/products/${product.id}`}
               style={{ textDecoration: "none", width: "100%" }}

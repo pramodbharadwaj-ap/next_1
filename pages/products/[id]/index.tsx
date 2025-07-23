@@ -3,6 +3,7 @@ import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 import useCartStore from "../../../stores/cartStore";
 import useWishlistStore, { useHydrateWishlist } from "../../../stores/wishlistStore";
+import { useEffect } from "react";
 
 // UI-safe product type
 type Product = {
@@ -23,9 +24,11 @@ type ApiProduct = {
 };
 
 export default function ProductDetail({ product }: { product: Product }) {
-  useHydrateWishlist();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistStore();
   const addToCart = useCartStore((state) => state.addToCart);
+  useEffect(() => {
+    useHydrateWishlist();
+  }, []);
 
   if (!product) {
     return (

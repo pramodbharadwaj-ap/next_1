@@ -26,9 +26,28 @@ type ApiProduct = {
 export default function ProductDetail({ product }: { product: Product }) {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistStore();
   const addToCart = useCartStore((state) => state.addToCart);
+
+  // ✅ Use hydration in useEffect
   useEffect(() => {
     useHydrateWishlist();
   }, []);
+
+  const handleAddToCart = () => {
+    addToCart({ ...product, quantity: 1 });
+  };
+
+  const handleWishlist = () => {
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+      });
+    }
+  };
 
   if (!product) {
     return (
@@ -41,21 +60,6 @@ export default function ProductDetail({ product }: { product: Product }) {
       </div>
     );
   }
-
-  const handleAddToCart = () => {
-    addToCart({ ...product, quantity: 1 });
-  };
-
-  const handleWishlist = () => {
-    isInWishlist(product.id)
-      ? removeFromWishlist(product.id)
-      : addToWishlist({
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          image: product.image,
-        });
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-100 dark:from-[#232329] dark:to-[#18181b] p-8 pb-20">
@@ -70,10 +74,9 @@ export default function ProductDetail({ product }: { product: Product }) {
               height={180}
               className="rounded-lg object-contain bg-gray-100 dark:bg-[#18181b] shadow-md border border-gray-200"
             />
-            {/* Wishlist Icon Button */}
             <button
               className="absolute top-2 right-2 bg-white rounded-full p-2 shadow hover:bg-pink-100"
-              onClick={() => handleWishlist()}
+              onClick={handleWishlist}
               aria-label="Add to wishlist"
               type="button"
             >

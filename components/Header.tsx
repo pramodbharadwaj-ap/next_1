@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs";
 import useCartStore from "../stores/cartStore";
-import useWishlistStore, { useHydrateWishlist } from "../stores/wishlistStore"; // Add this import
+import useWishlistStore, { useHydrateWishlist } from "../stores/wishlistStore";
 import { useRouter } from "next/router";
 
 // Accept hideAuthButtons prop to optionally hide sign-in/sign-up buttons
@@ -10,7 +10,13 @@ export default function Header({ hideAuthButtons = false }: { hideAuthButtons?: 
   useHydrateWishlist(); 
   const { user } = useUser();
   const cartItems = useCartStore((state) => state.cartItems);
-  const wishlistItems = useWishlistStore ? useWishlistStore((state) => state.wishlistItems) : [];
+  interface WishlistState {
+    wishlistItems: any[]; // Replace 'any' with your actual item type if known
+  }
+  type UseWishlistStore = ((selector: (state: WishlistState) => any[]) => any[]) | undefined;
+  const wishlistItems: any[] = (useWishlistStore as UseWishlistStore)
+    ? useWishlistStore((state: WishlistState) => state.wishlistItems)
+    : [];
   const cartCount = cartItems.length;
   const wishlistCount = wishlistItems.length;
   const router = useRouter();

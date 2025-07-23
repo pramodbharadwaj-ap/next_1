@@ -5,7 +5,8 @@ import Image from "next/image";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import useCartStore from "../../stores/cartStore";
-import useWishlistStore from "../../stores/wishlistStore"; // Add this import
+import { useHydrateWishlist } from "../../stores/wishlistStore"; // Add this import
+import useWishlistStore from "../../stores/wishlistStore";
 
 // === Type Definitions ===
 type Product = {
@@ -30,6 +31,7 @@ type RawProduct = {
 
 // === Component ===
 export default function Products({ products = [] }: { products: Product[] }) {
+  useHydrateWishlist(); // Hydrate wishlist from localStorage on client
   const addToCart = useCartStore((state) => state.addToCart);
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistStore();
 

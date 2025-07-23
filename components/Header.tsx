@@ -5,18 +5,21 @@ import useCartStore from "../stores/cartStore";
 import useWishlistStore, { useHydrateWishlist } from "../stores/wishlistStore";
 import { useRouter } from "next/router";
 
+// Define the wishlist item type
+type WishlistItem = {
+  id: number;
+  name: string;
+  price: string;
+  image: string;
+};
+
 // Accept hideAuthButtons prop to optionally hide sign-in/sign-up buttons
 export default function Header({ hideAuthButtons = false }: { hideAuthButtons?: boolean }) {
   useHydrateWishlist(); 
   const { user } = useUser();
   const cartItems = useCartStore((state) => state.cartItems);
-  interface WishlistState {
-    wishlistItems: any[]; // Replace 'any' with your actual item type if known
-  }
-  type UseWishlistStore = ((selector: (state: WishlistState) => any[]) => any[]) | undefined;
-  const wishlistItems: any[] = (useWishlistStore as UseWishlistStore)
-    ? useWishlistStore((state: WishlistState) => state.wishlistItems)
-    : [];
+  // Use the correct type for wishlist items
+  const wishlistItems: WishlistItem[] = useWishlistStore((state) => state.wishlistItems);
   const cartCount = cartItems.length;
   const wishlistCount = wishlistItems.length;
   const router = useRouter();

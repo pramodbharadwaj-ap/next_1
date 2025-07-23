@@ -70,7 +70,7 @@ export default function ProductDetail({ product }: { product: Product }) {
             {/* Wishlist Icon Button */}
             <button
               className="absolute top-2 right-2 bg-white rounded-full p-2 shadow hover:bg-pink-100"
-              onClick={handleWishlist}
+              onClick={() => handleWishlist()}
               aria-label="Add to wishlist"
               type="button"
             >

@@ -51,7 +51,7 @@ export function useHydrateWishlist() {
   const hydrate = useWishlistStore((state) => state.hydrate);
   useEffect(() => {
     hydrate();
-  }, [hydrate]);
+  }, []);
 }
 
 export default useWishlistStore;

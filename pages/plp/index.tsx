@@ -2,10 +2,11 @@
 import { css } from "@emotion/react";
 import Link from "next/link";
 import Image from "next/image";
+import { useEffect, useState } from "react"; // ✅ NEW
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import useCartStore from "../../stores/cartStore";
-import { useHydrateWishlist } from "../../stores/wishlistStore"; // Add this import
+import { useHydrateWishlist } from "../../stores/wishlistStore";
 import useWishlistStore from "../../stores/wishlistStore";
 
 // === Type Definitions ===
@@ -30,10 +31,109 @@ type RawProduct = {
 };
 
 // === Component ===
-export default function Products({ products = [] }: { products: Product[] }) {
+export default function Products() {
+  // ✅ Local state instead of getStaticProps
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   useHydrateWishlist(); // Hydrate wishlist from localStorage on client
   const addToCart = useCartStore((state) => state.addToCart);
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistStore();
+
+  // ✅ Client-side data fetching
+  useEffect(() => {
+    async function fetchProducts() {
+      console.log("📌 Running client-side fetch for PLP page...");
+
+      try {
+        const url = "https://fakestoreapi.com/products";
+        console.log("🔍 Fetching products from:", url);
+
+        const res = await fetch(url);
+        console.log("📡 Fetch status:", res.status);
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch products");
+        }
+
+        const data: RawProduct[] = await res.json();
+        console.log("📦 Total products received:", data.length);
+
+        const mapped: Product[] = data.map((product) => ({
+          id: product.id,
+          name: product.title,
+          description: product.description,
+          price: `$${product.price.toFixed(2)}`,
+          image: product.image,
+          category: product.category,
+          rating: product.rating,
+        }));
+
+        console.log("✨ Products after mapping:", mapped.length);
+        setProducts(mapped);
+      } catch (err) {
+        console.error("❌ Error loading products on client:", err);
+        setError("Unable to load products. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchProducts();
+  }, []);
+
+  // ✅ Loading / error / empty states
+  if (loading) {
+    return (
+      <div
+        css={css`
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.2rem;
+          color: #1e293b;
+        `}
+      >
+        Loading products...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div
+        css={css`
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.1rem;
+          color: #b91c1c;
+        `}
+      >
+        {error}
+      </div>
+    );
+  }
+
+  if (!products.length) {
+    return (
+      <div
+        css={css`
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.1rem;
+          color: #64748b;
+        `}
+      >
+        No products available.
+      </div>
+    );
+  }
 
   return (
     <div
@@ -126,11 +226,10 @@ export default function Products({ products = [] }: { products: Product[] }) {
                 strokeWidth="2"
                 viewBox="0 0 24 24"
               >
-                <path
-                  d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 1.01 4.5 2.09C13.09 4.01 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                />
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 1.01 4.5 2.09C13.09 4.01 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
               </svg>
             </button>
+
             <Link
               href={`/products/${product.id}`}
               style={{ textDecoration: "none", width: "100%" }}
@@ -246,49 +345,3 @@ export default function Products({ products = [] }: { products: Product[] }) {
     </div>
   );
 }
-
-// === Data Fetching ===
-export async function getStaticProps() {
-  console.log("📌 Running getStaticProps for PLP page...");
-
-  try {
-    const url = "https://fakestoreapi.com/products";
-    console.log("🔍 Fetching products from:", url);
-
-    const res = await fetch(url);
-
-    console.log("📡 Fetch status:", res.status);
-
-    if (!res.ok) {
-      throw new Error("Failed to fetch products");
-    }
-
-    const data: RawProduct[] = await res.json();
-
-    console.log("📦 Total products received:", data.length);
-
-    const products: Product[] = data.map((product) => ({
-      id: product.id,
-      name: product.title,
-      description: product.description,
-      price: `$${product.price.toFixed(2)}`,
-      image: product.image,
-      category: product.category,
-      rating: product.rating,
-    }));
-
-    console.log("✨ Products after mapping:", products.length);
-
-    return {
-      props: { products },
-      revalidate: 60,
-    };
-  } catch (error) {
-    console.error("❌ Error in getStaticProps:", error);
-    return {
-      props: { products: [] },
-      revalidate: 60,
-    };
-  }
-}
-

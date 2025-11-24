@@ -249,11 +249,23 @@ export default function Products({ products = [] }: { products: Product[] }) {
 
 // === Data Fetching ===
 export async function getStaticProps() {
+  console.log("📌 Running getStaticProps for PLP page...");
+
   try {
-    const res = await fetch("https://fakestoreapi.com/products");
-    if (!res.ok) throw new Error("Failed to fetch products");
+    const url = "https://fakestoreapi.com/products";
+    console.log("🔍 Fetching products from:", url);
+
+    const res = await fetch(url);
+
+    console.log("📡 Fetch status:", res.status);
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch products");
+    }
 
     const data: RawProduct[] = await res.json();
+
+    console.log("📦 Total products received:", data.length);
 
     const products: Product[] = data.map((product) => ({
       id: product.id,
@@ -265,14 +277,18 @@ export async function getStaticProps() {
       rating: product.rating,
     }));
 
+    console.log("✨ Products after mapping:", products.length);
+
     return {
       props: { products },
       revalidate: 60,
     };
   } catch (error) {
-    console.error("Error in getStaticProps:", error);
+    console.error("❌ Error in getStaticProps:", error);
     return {
       props: { products: [] },
+      revalidate: 60,
     };
   }
 }
+

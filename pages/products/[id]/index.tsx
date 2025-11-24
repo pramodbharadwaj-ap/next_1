@@ -113,38 +113,61 @@ export default function ProductDetail({ product }: { product: Product }) {
 }
 
 export async function getStaticPaths() {
-  const res = await fetch("https://fakestoreapi.com/products");
-  const data: ApiProduct[] = await res.json();
+  try {
+    const res = await fetch("https://fakestoreapi.com/products");
 
-  const paths = data.map((product) => ({
-    params: { id: product.id.toString() },
-  }));
+    if (!res.ok) {
+      console.error("❌ getStaticPaths: Failed to fetch products. Status:", res.status);
+      return { paths: [], fallback: false }; // or fallback: "blocking"
+    }
 
-  return {
-    paths,
-    fallback: false,
-  };
+    const data: ApiProduct[] = await res.json();
+
+    const paths = data.map((product) => ({
+      params: { id: product.id.toString() },
+    }));
+
+    console.log("✅ getStaticPaths: total product paths:", paths.length);
+
+    return {
+      paths,
+      fallback: false, // or "blocking" if you want on-demand pages
+    };
+  } catch (err) {
+    console.error("❌ getStaticPaths: Error fetching products:", err);
+    return {
+      paths: [],
+      fallback: false,
+    };
+  }
 }
 
 export async function getStaticProps({ params }: { params: { id: string } }) {
-  const res = await fetch(`https://fakestoreapi.com/products/${params.id}`);
+  try {
+    const res = await fetch(`https://fakestoreapi.com/products/${params.id}`);
 
-  if (!res.ok) {
+    if (!res.ok) {
+      console.error("❌ getStaticProps: Failed to fetch product", params.id, "Status:", res.status);
+      return { notFound: true };
+    }
+
+    const product: ApiProduct = await res.json();
+
+    return {
+      props: {
+        product: {
+          id: product.id,
+          name: product.title,
+          description: product.description,
+          price: `$${product.price}`,
+          image: product.image,
+        },
+      },
+      revalidate: 60,
+    };
+  } catch (err) {
+    console.error("❌ getStaticProps: Error fetching product", params.id, err);
     return { notFound: true };
   }
-
-  const product: ApiProduct = await res.json();
-
-  return {
-    props: {
-      product: {
-        id: product.id,
-        name: product.title,
-        description: product.description,
-        price: `$${product.price}`,
-        image: product.image,
-      },
-    },
-    revalidate: 60,
-  };
 }
+

@@ -15,7 +15,7 @@
     "@emotion/server": "^11.11.0",
     "@emotion/styled": "^11.14.0",
     "my-next-app": "file:",
-    "next": "^16.0.3",
+    "next": "16.0.7",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "zustand": "^5.0.5"
